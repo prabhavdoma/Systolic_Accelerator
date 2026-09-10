@@ -5,35 +5,35 @@ module pe #(
 
 )(
     input  logic               clk, rst,
-    input  logic signed [7:0]  in_a, in_b,
-    input  logic               in_en, in_clear, 
+    input  logic signed [7:0]  a_i, b_i,
+    input  logic               en_i, clr_i, 
     input  logic               drain_en,
-    input  logic signed [31:0] psum_in,
+    input  logic signed [31:0] psum_i,
 
-    output logic signed [7:0]  out_a, out_b,
-    output logic               out_en, out_clear,
+    output logic signed [7:0]  a_o, b_o,
+    output logic               en_o, clr_o,
 
     output logic signed [31:0] acc
 );
     //multiply
     logic signed [15:0] prod;
-    assign prod = in_a * in_b;
+    assign prod = a_i * b_i;
 
     //accumulate
     always_ff @(posedge clk) begin
         if (rst) begin
-            out_a <= '0; out_b <= '0; out_en <= '0; out_clear <= '0;
+            a_o <= '0; b_o <= '0; en_o <= '0; clr_o <= '0;
         end else begin
-            out_a <= in_a;
-            out_b <= in_b;
-	    out_en <= in_en;
-	    out_clear <= in_clear;
+            a_o <= a_i;
+            b_o <= b_i;
+	    en_o <= en_i;
+	    clr_o <= clr_i;
 	end
 	
 	if (drain_en) begin
-	    acc <= psum_in;
+	    acc <= psum_i;
 	    
-	end else if (in_en && in_clear) acc <= prod;
-	else if (in_en) acc <= acc + prod;
+	end else if (en_i && clr_i) acc <= prod;
+	else if (en_i) acc <= acc + prod;
     end
 endmodule 
