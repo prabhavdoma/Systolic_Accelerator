@@ -22,7 +22,7 @@ module pe #(
     //accumulate
     always_ff @(posedge clk) begin
         if (rst) begin
-            a_o <= '0; b_o <= '0; en_o <= '0; clr_o <= '0;
+            a_o <= '0; b_o <= '0; en_o <= '0; clr_o <= '0; acc <= '0;
         end else begin
             a_o <= a_i;
             b_o <= b_i;
