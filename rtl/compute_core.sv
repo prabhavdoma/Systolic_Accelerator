@@ -2,11 +2,11 @@ module compute_core(
     input  logic clk, rst,
     input  logic signed [7:0] a_i [0:15],
     input  logic signed [7:0] b_i [0:15],
-    input  logic en_i;
-    input  logic clr_i;
-    input  logic drain_en;
+    input  logic en_i,
+    input  logic clr_i,
+    input  logic drain_en,
     
-    output logic signed [7:0] out [0:15],
+    output logic signed [31:0] out [0:15]
 );
     //skew wires
     logic signed [7:0] a_sk [0:15];
