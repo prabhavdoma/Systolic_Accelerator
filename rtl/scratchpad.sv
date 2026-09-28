@@ -1,34 +1,58 @@
 
 module scratchpad #(
-    parameter int WIDTH = 128,
+    parameter int WORD_WIDTH = 128,
     parameter int DEPTH,
     parameter int BANKS = 4,
-    parameter int BANK_DEPTH = DEPTH/BANKS
+    parameter int R_WIDTH,
+    parameter int W_WIDTH
 )(
     input  logic clk,
-    input  logic wr_en, r_en,
-    input  logic [$clog2(BANK_DEPTH) - 1:0] waddr,
-    input  logic [$clog2(DEPTH) - 1:0] raddr,
-    input  logic [3:0][WIDTH - 1:0] wdata,
-
-    output logic [WIDTH - 1:0] rdata
+    input  logic w_en, r_en,
+    input  logic [$clog2(DEPTH/(W_WIDTH/WORD_WIDTH)) - 1:0] waddr,
+    input  logic [$clog2(DEPTH/(R_WIDTH/WORD_WIDTH)) - 1:0] raddr,
+    input  logic [W_WIDTH - 1:0] wdata,
+    output logic [R_WIDTH - 1:0] rdata
 );
 
-    //takes 4 chunks of 128 bit words -> write to 4 banks
+    localparam int BANK_DEPTH = DEPTH / BANKS;
+    localparam int BSEL       = $clog2(BANKS);
+    localparam int W_SLOTS    = W_WIDTH / WORD_WIDTH;
+    localparam int R_SLOTS    = R_WIDTH / WORD_WIDTH;
 
-    logic [WIDTH - 1:0] mem [0:BANKS - 1][0:BANK_DEPTH - 1];
+    logic [WORD_WIDTH - 1:0] mem [0:BANKS - 1][0:BANK_DEPTH - 1];
 
-    always_ff @(posedge clk) begin : WRITE
-        if (wr_en) begin
-            mem[0][waddr] <= wdata[0];
-            mem[1][waddr] <= wdata[1];
-            mem[2][waddr] <= wdata[2];
-            mem[3][waddr] <= wdata[3];
-        end
-    end
+    generate
+        //WRITE
+        if (W_SLOTS == BANKS) begin :g_wide_write
+            always_ff @(posedge clk) begin
+                if (w_en) begin
+                    for (int b = 0; b < BANKS; b++) 
+                        mem[b][waddr] <= wdata[b*WORD_WIDTH +: WORD_WIDTH];
+                end
+            end
+        end else begin : g_narrow_write
+            always_ff @(posedge clk) begin
+                if (w_en) begin
+                    mem[waddr[BSEL - 1:0]][waddr[$clogs(DEPTH-1:BSEL)]] <= wdata;
+                end
+            end
+        end 
+        //READ
+        if (R_SLOTS == BANKS) begin :g_wide_read
+            always_ff @(posedge clk) begin
+                if (r_en) begin
+                    for (int b = 0; b < BANKS; b++) 
+                        rdata[b*WORD_WIDTH +: WORD_WIDTH] <= mem[b][raddr];
+                end
+            end
+        end else begin : g_narrow_read
+            always_ff @(posedge clk) begin
+                if (r_en) begin
+                    rdata <= mem[raddr[BSEL - 1:0]][raddr[$clogs(DEPTH-1:BSEL)]];
+                end
+            end
+        end 
+    endgenerate
 
-    always_ff  @(posedge clk) begin : READ
-        if (r_en) rdata <= mem[raddr[1:0]][raddr[$clog2(DEPTH) - 1: 2]];
-    end
 
 endmodule   
