@@ -67,7 +67,7 @@ module controller#(
         next_state = state;
         case (state)
             IDLE:  if (start) next_state = ACC;
-            ACC:   if (word_ctr == k - 1) next_state = WAIT;
+            ACC:   if (data_ready && word_ctr == k - 1) next_state = WAIT;
             WAIT:  if (flush_ctr >= FLUSH_MAX && out_free) next_state = DRAIN;
             DRAIN: if (row_ctr == 0) next_state = IDLE;
         endcase
