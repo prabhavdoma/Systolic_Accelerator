@@ -36,4 +36,4 @@ module pe #(
 	end else if (en_i && clr_i) acc <= prod;
 	else if (en_i) acc <= acc + prod;
     end
-endmodule 
+endmodule

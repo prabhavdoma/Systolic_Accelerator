@@ -33,7 +33,7 @@ module scratchpad #(
         end else begin : g_narrow_write
             always_ff @(posedge clk) begin
                 if (w_en) begin
-                    mem[waddr[BSEL - 1:0]][waddr[$clogs(DEPTH-1:BSEL)]] <= wdata;
+                    mem[waddr[BSEL - 1:0]][waddr[$clog2(DEPTH)-1:BSEL]] <= wdata;
                 end
             end
         end 
@@ -48,7 +48,7 @@ module scratchpad #(
         end else begin : g_narrow_read
             always_ff @(posedge clk) begin
                 if (r_en) begin
-                    rdata <= mem[raddr[BSEL - 1:0]][raddr[$clogs(DEPTH-1:BSEL)]];
+                    rdata <= mem[raddr[BSEL - 1:0]][raddr[$clog2(DEPTH)-1:BSEL]];
                 end
             end
         end 

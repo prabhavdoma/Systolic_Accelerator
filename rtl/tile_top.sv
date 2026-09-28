@@ -13,7 +13,7 @@ module tile_top #(
     input  logic [511:0] dma_data_i,
     input  logic [$clog2(IN_DEPTH/BANKS) - 1:0] a_waddr,
     input  logic [$clog2(IN_DEPTH/BANKS) - 1:0] b_waddr,
-    input  logic [$clog2(OUT_DEPTH) - 1:0] out_raddr,
+    input  logic [$clog2(OUT_DEPTH/BANKS) - 1:0] out_raddr,
     input  logic a_wen,
     input  logic b_wen,
     input  logic out_ren,

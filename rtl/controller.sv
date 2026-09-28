@@ -1,13 +1,13 @@
 module controller#(
-    parameter int DEPTH = 32,
+    parameter int IN_DEPTH = 32,
     parameter int OUT_DEPTH = 16,
     parameter int SKEW_WIDTH = 15,
     parameter int ARRAY_WIDTH = 16
 )(
     input  logic clk, rst,
     input  logic start,
-    input  logic [$clog2(DEPTH):0] dma_wptr_a,
-    input  logic [$clog2(DEPTH):0] dma_wptr_b,
+    input  logic [$clog2(IN_DEPTH):0] dma_wptr_a,
+    input  logic [$clog2(IN_DEPTH):0] dma_wptr_b,
     input  logic [12:0] k, //covers until 8191 bits
     input  logic out_free,
 
@@ -15,12 +15,12 @@ module controller#(
     output logic en_q,
     output logic clr_q,
     output logic drain_en,
-    output logic [$clog2(DEPTH) - 1:0] a_raddr,
-    output logic [$clog2(DEPTH) - 1:0] b_raddr,
+    output logic [$clog2(IN_DEPTH) - 1:0] a_raddr,
+    output logic [$clog2(IN_DEPTH) - 1:0] b_raddr,
     output logic in_ren, 
     output logic [$clog2(OUT_DEPTH) - 1:0] out_waddr,
     output logic out_wen,
-    output logic [$clog2(DEPTH):0] rptr,
+    output logic [$clog2(IN_DEPTH):0] rptr,
     output logic done
 );
     //STATE REGISTER
@@ -30,19 +30,19 @@ module controller#(
     //counters
     logic [16:0] word_ctr;
     logic [4:0] flush_ctr;
-    logic [$clog2(DEPTH) - 1:0] row_ctr;
+    logic [$clog2(OUT_DEPTH) - 1:0] row_ctr;
     logic data_ready;
     logic en;
     logic clr;
     
     localparam int FLUSH_MAX = SKEW_WIDTH + ARRAY_WIDTH;
 
-    assign data_ready = (rptr != dma_wptr_a);
+    assign data_ready = (rptr != dma_wptr_a) && (rptr != dma_wptr_b);
 
     //assign outside cases and blocks because if false (nothing assign and infers a latch
     //which is bad for synthesis (broken timing))
-    assign a_raddr = rptr[$clog2(DEPTH)-1:0];
-    assign b_raddr = rptr[$clog2(DEPTH)-1:0];
+    assign a_raddr = rptr[$clog2(IN_DEPTH)-1:0];
+    assign b_raddr = rptr[$clog2(IN_DEPTH)-1:0];
     assign out_waddr = row_ctr;
 
     //delay en and clr by one cycle to match initial read injection cycle
@@ -121,10 +121,7 @@ module controller#(
                         row_ctr <= row_ctr - 1'b1;
                     end
                 end
-
             endcase
         end
     end
-
-
 endmodule

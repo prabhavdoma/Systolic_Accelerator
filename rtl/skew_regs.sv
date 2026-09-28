@@ -28,10 +28,10 @@ module skew_regs(
 
 	    for (j = 0; j < i; j++) begin : buffers
 	    	always_ff @(posedge clk) begin
-		    a_delay[i][j+1] <= a_delay[i][j];
-		    b_delay[i][j+1] <= b_delay[i][j];
-		    en_delay[i][j+1] <= en_delay[i][j];
-		    clr_delay[i][j+1] <= clr_delay[i][j];
+		    	a_delay[i][j+1] <= a_delay[i][j];
+		    	b_delay[i][j+1] <= b_delay[i][j];
+		    	en_delay[i][j+1] <= en_delay[i][j];
+		    	clr_delay[i][j+1] <= clr_delay[i][j];
 	    	end
 	    end
 	    assign a_o[i] = a_delay[i][i];
