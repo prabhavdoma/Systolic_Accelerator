@@ -59,6 +59,7 @@ module compute_core(
     );
 
 	requant requant_inst (
+		.clk(clk),
 		.m(m),
 		.s(s),
 		.bias(bias),

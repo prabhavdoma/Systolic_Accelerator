@@ -1,0 +1,11 @@
+{
+  "DESIGN_NAME": "tile_top",
+  "VERILOG_FILES": "dir::src/tile_top.v",
+  "CLOCK_PORT": "clk",
+  "CLOCK_PERIOD": 25,
+  "FP_CORE_UTIL": 40,
+  "PL_TARGET_DENSITY_PCT": 50,
+  "ROUTING_CORES": 20,
+  "RUN_MAGIC_DRC": false,
+  "RUN_KLAYOUT_XOR": false
+}
