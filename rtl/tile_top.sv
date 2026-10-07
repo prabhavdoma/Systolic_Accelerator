@@ -19,10 +19,11 @@ module tile_top #(
     input  logic out_ren,
 
     //csr
-	input  logic signed [31:0] bias [0:15],
-	input  logic signed [31:0] m,
-	input  logic signed [7:0] s,
-	input  logic relu_en,
+	input  logic signed [15:0] m,
+    input  logic [5:0] s,
+    input  logic signed [31:0] bias [0:15],
+    input  logic [49:0] rounding_const,
+    input  logic signed [7:0] lo,
 
 
     //controller ports
@@ -61,6 +62,26 @@ module tile_top #(
     //.relu_en(relu_en) or something like ts idrk yet
     //);
 
+    logic done_raw, done_d1;
+    logic out_wen_d1, out_wen_d2;
+    logic [$clog2(OUT_DEPTH) - 1:0] out_waddr_d1, out_waddr_d2;
+
+    always_ff @(posedge clk) begin
+        if (rst) begin
+            out_wen_d1 <= 1'b0;
+            out_wen_d2 <= 1'b0;
+            done_d1    <= 1'b0;
+            done       <= 1'b0;
+        end else begin
+            out_wen_d1 <= out_wen;
+            out_wen_d2 <= out_wen_d1;
+            done_d1    <= done_raw;
+            done       <= done_d1;
+        end
+        out_waddr_d1 <= out_waddr;
+        out_waddr_d2 <= out_waddr_d1;
+    end
+
  
     // ---- controller ----
     controller #(
@@ -85,7 +106,7 @@ module tile_top #(
         .out_waddr   (out_waddr),
         .out_wen     (out_wen),
         .rptr        (rptr),
-        .done        (done)
+        .done        (done_raw)
     );
  
     // ---- scratchpad A ----
@@ -97,7 +118,7 @@ module tile_top #(
         .W_WIDTH    (512)
     ) spad_a (
         .clk   (clk),
-        .w_en (a_wen),
+        .w_en  (a_wen),
         .r_en  (in_ren),
         .waddr (a_waddr),
         .raddr (a_raddr),
@@ -133,9 +154,9 @@ module tile_top #(
         .W_WIDTH    (128)
     ) spad_out (
         .clk   (clk),
-        .w_en (out_wen),
+        .w_en (out_wen_d2),
         .r_en  (out_ren),
-        .waddr (out_waddr),
+        .waddr (out_waddr_d2),
         .raddr (out_raddr),
         .wdata (compute_o),
         .rdata (dma_data_o)
@@ -151,9 +172,12 @@ module tile_top #(
         .clr_i    (clr),
         .drain_en (drain_en),
         .bias     (bias),
-        .m        (m),
+        .m        (m),s
         .s        (s),
         .relu_en  (relu_en),
+        .rounding_const(rounding_const),
+        .lo(lo),
+        
         .out_word (compute_o)
     );
  

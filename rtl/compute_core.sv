@@ -7,9 +7,11 @@ module compute_core(
     input  logic clr_i,
     input  logic drain_en,
 	input  logic signed [31:0] bias [0:15],
-	input  logic signed [31:0] m,
-	input  logic signed [7:0] s,
+	input  logic signed [15:0] m,
+	input  logic signed [5:0] s,
 	input  logic relu_en,
+	input  logic signed [49:0] rounding_const;
+    input  logic signed [7:0] lo;
     
     output logic [15:0][7:0] out_word
 );
@@ -64,6 +66,8 @@ module compute_core(
 		.s(s),
 		.bias(bias),
 		.relu_en(relu_en),
+		.rounding_const(rounding_const),
+		.lo(lo),
 		.out_32(out_32),
 		.out_8(out_8)
 	);
