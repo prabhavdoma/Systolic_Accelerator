@@ -1,7 +1,7 @@
 
 
 module tile_top #(
-    parameter int IN_DEPTH = 32,
+    parameter int IN_DEPTH = 64,
     parameter int OUT_DEPTH = 16,
     parameter int SKEW_WIDTH = 15,
     parameter int ARRAY_WIDTH = 16,
@@ -10,7 +10,7 @@ module tile_top #(
 )(
     //dma->scratchpad inputs
     input  logic clk, rst,
-    input  logic [511:0] dma_data_i,
+    input  logic [1023:0] dma_data_i,
     input  logic [$clog2(IN_DEPTH/BANKS) - 1:0] a_waddr,
     input  logic [$clog2(IN_DEPTH/BANKS) - 1:0] b_waddr,
     input  logic [$clog2(OUT_DEPTH/BANKS) - 1:0] out_raddr,
@@ -41,11 +41,12 @@ module tile_top #(
     logic en;
     logic clr;
     logic drain_en;
+    logic in_ren;
+    logic out_wen;
     logic [$clog2(IN_DEPTH) - 1:0] a_raddr;
     logic [$clog2(IN_DEPTH) - 1:0] b_raddr;
-    logic in_ren;
     logic [$clog2(OUT_DEPTH) - 1:0] out_waddr;
-    logic out_wen;
+
 
     //scratchpad internal wires
     logic [WORD_WIDTH - 1:0] rdata_a;
@@ -54,13 +55,6 @@ module tile_top #(
     //compute_core internal wires
     logic [15:0][7:0] compute_o;    //128 bits
 
-    
-    
-    //csr csr_inst (
-    //.m(m),
-    //.s(s),
-    //.relu_en(relu_en) or something like ts idrk yet
-    //);
 
     logic done_raw, done_d1;
     logic out_wen_d1, out_wen_d2;
